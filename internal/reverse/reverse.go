@@ -1,27 +1,24 @@
-package main
+package reverse
 
 import (
-	"github.com/joho/godotenv"
 	"io"
 	"log"
 	"net"
-	"os"
 )
 
-func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+type Proxy struct {
+	endpoint string
+	target   string
+}
 
-	endpoint := os.Getenv("ENDPOINT")
-	target := os.Getenv("TARGET")
+func NewProxy(endpoint string, target string) *Proxy {
+	proxy := &Proxy{endpoint: endpoint, target: target}
 
-	ln, err := net.Listen("tcp", endpoint)
+	ln, err := net.Listen("tcp", proxy.endpoint)
 	if err != nil {
 		panic(err)
 	}
-	log.Printf("Listening on %s", endpoint)
+	log.Printf("Listening reverse proxy on %s, redirect to %s", proxy.endpoint, proxy.target)
 
 	for {
 		conn, err := ln.Accept()
@@ -29,8 +26,10 @@ func main() {
 			panic(err)
 		}
 		log.Printf("Get connection from %s\n", conn.RemoteAddr().String())
-		go handleRequest(conn, target)
+		go handleRequest(conn, proxy.target)
 	}
+
+	return proxy
 }
 
 func handleRequest(conn net.Conn, target string) {
