@@ -17,13 +17,14 @@ func main() {
 	proxyType := os.Getenv("TYPE")
 	endpoint := os.Getenv("ENDPOINT")
 	target := os.Getenv("TARGET")
+	dns := os.Getenv("DNS")
 
 	switch proxyType {
 	case "reverse":
 		reverse.NewProxy(endpoint, target)
 	case "regular":
-		regular.NewProxy(endpoint)
+		regular.NewProxy(endpoint, dns)
 	default:
-		regular.NewProxy(endpoint)
+		regular.NewProxy(endpoint, dns)
 	}
 }
